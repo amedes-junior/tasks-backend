@@ -2,6 +2,7 @@ const moment = require('moment')
 
 module.exports = app => {
     const getTasks = (req, res) => {
+        console.log(req.query)
         const date = req.query.date ? req.query.date
             : moment().endOf('day').toDate()
 
@@ -9,11 +10,20 @@ module.exports = app => {
             .where({ userId: req.user.id })
             .where('estimateAt', '<=', date)
             .orderBy('estimateAt')
-            .then(tasks => res.json(tasks))
+            .then(tasks => {
+                res.json(tasks)
+            })
             .catch(err => res.status(400).json(err))
+
+
     }
 
     const save = (req, res) => {
+        console.log(req.body)
+
+        // Alteração na Data
+        req.body.estimateAt = req.body.estimateAt.replace('T', ' ').replace('Z', '')
+
         if (!req.body.desc.trim()) {
             return res.status(400).send('Descrição é um campo obrigatório')
         }
@@ -27,6 +37,9 @@ module.exports = app => {
     }
 
     const remove = (req, res) => {
+        console.log(req.params)
+        console.log(req.user)
+
         app.db('tasks')
             .where({ id: req.params.id, userId: req.user.id })
             .del()
@@ -42,6 +55,9 @@ module.exports = app => {
     }
 
     const updateTaskDoneAt = (req, res, doneAt) => {
+        console.log(req.params)
+        console.log(req.user)
+
         app.db('tasks')
             .where({ id: req.params.id, userId: req.user.id })
             .update({ doneAt })
@@ -50,6 +66,9 @@ module.exports = app => {
     }
 
     const toggleTask = (req, res) => {
+        console.log(req.params)
+        console.log(req.user)
+
         app.db('tasks')
             .where({ id: req.params.id, userId: req.user.id })
             .first()
